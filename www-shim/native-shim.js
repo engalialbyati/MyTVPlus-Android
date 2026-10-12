@@ -124,6 +124,62 @@
     channels: () => fetchCatalog('channels', 'channels/getChannelsDetail_local.php', { encrypted: true }),
     movies: () => fetchCatalog('movies', 'movies/getMoviesDetail_local.php'),
     series: () => fetchCatalog('series', 'series/getSeriesDetail_local.php'),
+    // Release-year index: the catalog has no year field; crawl seasons once
+    // (bounded concurrency, cached 3 days) and derive first-air years.
+    seriesYears: async () => ({
+      years: lsGet('mytv_series_years', {}),
+      crawl: lsGet('mytv_years_crawl', { running: false, done: true, have: 0, total: 0 }),
+    }),
+    seriesYearsStart: async () => {
+      const meta = lsGet('mytv_years_meta', { fetchedAt: 0 });
+      if (Date.now() - meta.fetchedAt < 3 * 24 * 60 * 60 * 1000 && meta.done) return { cached: true };
+      if (lsGet('mytv_years_crawl', { running: false }).running) return { cached: false };
+      lsSet('mytv_years_crawl', { running: true, done: false, have: Object.keys(lsGet('mytv_series_years', {})).length, total: 0 });
+      (async () => {
+        try {
+          const series = await fetchCatalog('series', 'series/getSeriesDetail_local.php');
+          const years = lsGet('mytv_series_years', {});
+          const attempted = lsGet('mytv_years_attempted', {});
+          const queue = series.map(x => String(x.id)).filter(id => !attempted[id]);
+          lsSet('mytv_years_crawl', { running: true, done: false, have: Object.keys(years).length, total: series.length });
+          let idx = 0, active = 0;
+          await new Promise((resolve) => {
+            const next = () => {
+              while (active < 6 && idx < queue.length) {
+                const id = queue[idx++];
+                active++;
+                apiPost('series/getSeriesSeasonDetail.php', { id, userId: state.userId })
+                  .then(text => {
+                    const seasons = JSON.parse(text);
+                    const ys = (Array.isArray(seasons) ? seasons : [])
+                      .map(x => parseInt(x.year, 10)).filter(Number.isFinite);
+                    if (ys.length) years[id] = Math.min(...ys);
+                  })
+                  .catch(() => { delete attempted[id]; })
+                  .finally(() => {
+                    attempted[id] = 1;
+                    active--;
+                    if (idx % 250 === 0) {
+                      lsSet('mytv_series_years', years); lsSet('mytv_years_attempted', attempted);
+                      lsSet('mytv_years_crawl', { running: true, done: false, have: Object.keys(years).length, total: queue.length });
+                    }
+                    if (idx >= queue.length && active === 0) resolve();
+                    else next();
+                  });
+              }
+              if (queue.length === 0) resolve();
+            };
+            next();
+          });
+          lsSet('mytv_series_years', years); lsSet('mytv_years_attempted', attempted);
+          lsSet('mytv_years_meta', { fetchedAt: Date.now(), done: true });
+          lsSet('mytv_years_crawl', { running: false, done: true, have: Object.keys(years).length, total: queue.length });
+        } catch (e) {
+          lsSet('mytv_years_crawl', { running: false, done: false, have: 0, total: 0 });
+        }
+      })();
+      return { cached: false };
+    },
     movieCategories: () => fetchCatalog('movieCategories', 'movies/getMoviesCategory.php'),
     movieCategoryConnections: () => fetchCatalog('movieCategoryConnections', 'movies/getMoviesCategoryConnection.php'),
     seasons: async (seriesId) => JSON.parse(await apiPost('series/getSeriesSeasonDetail.php', { id: String(seriesId), userId: state.userId })),
