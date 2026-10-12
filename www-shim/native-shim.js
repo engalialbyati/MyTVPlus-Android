@@ -22,8 +22,19 @@
   let activeHostIdx = 0;
   let state = null;
 
-  const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+  const lsGet = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return (v === null || v === undefined) ? d : v; } catch (e) { return d; } };
   const lsSet = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+  // crypto.randomUUID needs Chrome 92+; older TV-box WebViews only have getRandomValues
+  function uuidv4() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    const b = new Uint8Array(16);
+    window.crypto.getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const h = Array.prototype.map.call(b, function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+    return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+  }
 
   function decryptPayload(s) {
     const mid = Math.floor(s.length / 2);
@@ -66,7 +77,7 @@
   async function bootstrap() {
     state = lsGet('mytv_state', null);
     if (state && state.userId) return { ...state };
-    state = state || { uuid: crypto.randomUUID(), userId: null, createdAt: Date.now() };
+    state = state || { uuid: uuidv4(), userId: null, createdAt: Date.now() };
     const body = {
       deviceType: 'Android', uuid: state.uuid,
       joinDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -88,7 +99,7 @@
       const raw = JSON.parse(r.data);
       if (Date.now() - raw.fetchedAt > maxAge) return null;
       return raw.data;
-    } catch { return null; }
+    } catch (e) { return null; }
   }
   async function cacheSet(name, data) {
     try {
@@ -191,7 +202,7 @@
     info: () => ({ version: APP_VERSION, ua: UA, platform: 'android' }),
     proxyUrl: async (url) => {
       if (Boot) {
-        try { return (await Boot.proxyUrl({ url })).value; } catch { return url; }
+        try { return (await Boot.proxyUrl({ url })).value; } catch (e) { return url; }
       }
       return url;
     },

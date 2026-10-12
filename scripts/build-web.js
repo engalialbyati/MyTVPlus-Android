@@ -21,6 +21,7 @@ html = html.replace('<meta charset="UTF-8">',
   '<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">');
 html = html.replace('<link rel="stylesheet" href="styles.css">', '<link rel="stylesheet" href="css/styles.css">');
 html = html.replace('<script src="vendor/hls.min.js"></script>',
+  '<script src="js/compat.js"></script>\n' +
   '<script src="vendor/crypto-js.min.js"></script>\n' +
   '<script src="vendor/capacitor.js"></script>\n' +
   '<script src="vendor/hls.min.js"></script>\n' +
@@ -35,6 +36,7 @@ copy(path.join(ROOT, 'node_modules', '@capacitor', 'core', 'dist', 'capacitor.js
 
 // shim
 copy(path.join(ROOT, 'www-shim', 'native-shim.js'), path.join(WWW, 'js', 'native-shim.js'));
+copy(path.join(ROOT, 'www-shim', 'compat.js'), path.join(WWW, 'js', 'compat.js'));
 
 function mkdirp(d) { fs.mkdirSync(d, { recursive: true }); return d; }
 function copy(a, b) { fs.copyFileSync(a, b); console.log('copied', path.relative(ROOT, b)); }
