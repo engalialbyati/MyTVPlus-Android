@@ -20,6 +20,11 @@ public class Boot extends Plugin {
 
     static final String PREFS = "mytv_boot";
 
+    static boolean tvEnabled(Context ctx) {
+        SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return p.getBoolean("tv_controls", false);   // default off, user opts in
+    }
+
     static boolean isEnabled(Context ctx) {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         return p.getBoolean("enabled", true);   // default ON: user asked for boot start
@@ -37,6 +42,21 @@ public class Boot extends Plugin {
         boolean v = call.getBoolean("value", true);
         getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putBoolean("enabled", v).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void tvEnabled(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("value", tvEnabled(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void tvSetEnabled(PluginCall call) {
+        boolean v = call.getBoolean("value", false);
+        getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean("tv_controls", v).apply();
         call.resolve();
     }
 
