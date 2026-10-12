@@ -20,9 +20,17 @@ public class Boot extends Plugin {
 
     static final String PREFS = "mytv_boot";
 
+    /** Mirrors whether the JS player overlay is open, so dispatchKeyEvent can
+     *  check synchronously: keys are only routed to the player while it is. */
+    private static volatile boolean playerOpen = false;
+
     static boolean tvEnabled(Context ctx) {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return p.getBoolean("tv_controls", false);   // default off, user opts in
+        return p.getBoolean("tv_controls", true);   // default ON: keys behave like the original app
+    }
+
+    static boolean isPlayerOpen() {
+        return playerOpen;
     }
 
     static boolean isEnabled(Context ctx) {
@@ -57,6 +65,12 @@ public class Boot extends Plugin {
         boolean v = call.getBoolean("value", false);
         getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putBoolean("tv_controls", v).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void setPlayerOpen(PluginCall call) {
+        playerOpen = call.getBoolean("value", false);
         call.resolve();
     }
 
