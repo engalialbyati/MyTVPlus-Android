@@ -133,6 +133,12 @@
       return typeof r.data === 'string' ? r.data : JSON.stringify(r.data);
     },
     info: () => ({ version: APP_VERSION, ua: UA, platform: 'android' }),
+    proxyUrl: async (url) => {
+      if (Boot) {
+        try { return (await Boot.proxyUrl({ url })).value; } catch { return url; }
+      }
+      return url;
+    },
 
     profilesList: async () => Object.values(profilesMap()).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
     profileCreate: async (name, avatar) => {

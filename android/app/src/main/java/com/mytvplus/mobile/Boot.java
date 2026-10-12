@@ -41,6 +41,19 @@ public class Boot extends Plugin {
     }
 
     @PluginMethod
+    public void proxyUrl(PluginCall call) {
+        String url = call.getString("url", "");
+        JSObject r = new JSObject();
+        int port = MediaProxy.getPort();
+        if (port > 0 && (url.startsWith("http://") || url.startsWith("https://"))) {
+            r.put("value", "http://127.0.0.1:" + port + "/m?u=" + java.net.URLEncoder.encode(url));
+        } else {
+            r.put("value", url);
+        }
+        call.resolve(r);
+    }
+
+    @PluginMethod
     public void canDrawOverlays(PluginCall call) {
         JSObject r = new JSObject();
         r.put("value", Settings.canDrawOverlays(getContext()));
