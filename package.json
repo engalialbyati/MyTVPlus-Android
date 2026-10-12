@@ -1,0 +1,17 @@
+{
+  "name": "mytvplus-mobile",
+  "version": "1.0.0",
+  "description": "Unofficial MyTV+ Android client (Capacitor wrapper of the desktop renderer)",
+  "private": true,
+  "scripts": {
+    "build:web": "node scripts/build-web.js",
+    "android": "npx cap sync android && cd android && gradlew.bat assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/filesystem": "^6.0.2",
+    "crypto-js": "^4.2.0"
+  }
+}

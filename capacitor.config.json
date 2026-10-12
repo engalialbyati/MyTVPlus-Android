@@ -1,0 +1,12 @@
+{
+  "appId": "com.mytvplus.mobile",
+  "appName": "MyTV+",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
