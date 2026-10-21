@@ -225,6 +225,9 @@
       return { profile: m[id], data: lsGet('mytv_pdata_' + id, emptyData()) };
     },
     profileSave: async (id, data) => lsSet('mytv_pdata_' + id, data),
+    remoteInfo: async () => ({ url: '', qrDataUrl: '' }),
+    remoteSendState: () => {},
+    onRemoteCommand: () => {},
   };
 
   // boot-on-boot settings (native plugin, Android only)
