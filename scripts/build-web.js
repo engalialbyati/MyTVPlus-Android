@@ -24,6 +24,7 @@ html = html.replace('<script src="vendor/hls.min.js"></script>',
   '<script src="js/compat.js"></script>\n' +
   '<script src="vendor/crypto-js.min.js"></script>\n' +
   '<script src="vendor/capacitor.js"></script>\n' +
+  '<script src="vendor/jsQR.js"></script>\n' +
   '<script src="vendor/hls.min.js"></script>\n' +
   '<script src="js/native-shim.js"></script>');
 html = html.replace('<script src="app.js"></script>', '<script src="js/app.js"></script>');
@@ -33,6 +34,7 @@ fs.writeFileSync(path.join(WWW, 'index.html'), html);
 copy(path.join(ROOT, '..', 'desktop-client', 'node_modules', 'hls.js', 'dist', 'hls.min.js'), path.join(WWW, 'vendor', 'hls.min.js'));
 copy(path.join(ROOT, 'node_modules', 'crypto-js', 'crypto-js.js'), path.join(WWW, 'vendor', 'crypto-js.min.js'));
 copy(path.join(ROOT, 'node_modules', '@capacitor', 'core', 'dist', 'capacitor.js'), path.join(WWW, 'vendor', 'capacitor.js'));
+copy(path.join(ROOT, 'node_modules', 'jsqr', 'dist', 'jsQR.js'), path.join(WWW, 'vendor', 'jsQR.js'));
 
 // shim
 copy(path.join(ROOT, 'www-shim', 'native-shim.js'), path.join(WWW, 'js', 'native-shim.js'));
