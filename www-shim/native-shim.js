@@ -228,6 +228,33 @@
     remoteInfo: async () => ({ url: '', qrDataUrl: '' }),
     remoteSendState: () => {},
     onRemoteCommand: () => {},
+    sendRemoteHttp: async (url, action, value) => {
+      try {
+        const res = await Http.post({
+          url: url + '/api/command',
+          headers: { 'Content-Type': 'application/json' },
+          data: { action, value },
+          connectTimeout: 5000,
+          readTimeout: 5000,
+        });
+        return res.data;
+      } catch (err) {
+        console.warn('sendRemoteHttp failed:', err);
+        throw err;
+      }
+    },
+    getRemoteStatus: async (url) => {
+      try {
+        const res = await Http.get({
+          url: url + '/api/status',
+          connectTimeout: 4000,
+          readTimeout: 4000,
+        });
+        return res.data;
+      } catch (err) {
+        throw err;
+      }
+    },
   };
 
   // boot-on-boot settings (native plugin, Android only)

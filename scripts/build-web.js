@@ -17,8 +17,10 @@ fs.copyFileSync(path.join(SRC, 'styles.css'), path.join(WWW, 'css', 'styles.css'
 
 // index.html: viewport + shim/crypto scripts
 let html = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
-html = html.replace('<meta charset="UTF-8">',
-  '<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">');
+if (!html.includes('viewport-fit=cover')) {
+  html = html.replace('<meta charset="UTF-8">',
+    '<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">');
+}
 html = html.replace('<link rel="stylesheet" href="styles.css">', '<link rel="stylesheet" href="css/styles.css">');
 html = html.replace('<script src="vendor/hls.min.js"></script>',
   '<script src="js/compat.js"></script>\n' +
